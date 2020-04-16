@@ -1,17 +1,20 @@
 package app
 
-import "github.com/sdetAutomation/go-users-api/controllers"
+import (
+	"github.com/sdetAutomation/go-users-api/controllers/users"
+	"github.com/sdetAutomation/go-users-api/controllers/health"
+)
 
 func mapUrls() {
-	router.GET("/health", controllers.Health)
-
-	router.GET("/users", controllers.GetUsers)
-
-	router.GET("/users/:user_id", controllers.SearchUser)
+	router.GET("/health", health.Health)
 	
-	router.POST("/users", controllers.CreateUser)
+	router.GET("/users", users.GetUsers)
 
-	router.PUT("/users/:user_id", controllers.UpdateUser)
+	router.GET("/users/:user_id", users.SearchUser)
+	
+	router.POST("/users", users.CreateUser)
 
-	router.DELETE("/users/:user_id", controllers.DeleteUser)
+	router.PUT("/users/:user_id", users.UpdateUser)
+
+	router.DELETE("/users/:user_id", users.DeleteUser)
 }

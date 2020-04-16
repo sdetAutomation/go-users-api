@@ -1,4 +1,4 @@
-package controllers
+package health
 
 import (
 	"net/http"
@@ -7,5 +7,5 @@ import (
 
 // Health ...
 func Health(c *gin.Context) {
-	c.String(http.StatusOK, "I am up, keep on coding that golang!!!")
+	c.String(http.StatusOK, "I am up, keep on coding the golang!!!")
 }

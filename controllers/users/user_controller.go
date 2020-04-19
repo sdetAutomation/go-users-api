@@ -1,11 +1,8 @@
 package users
 
 import (
-	// "encoding/json"
-	// "fmt"
-	// "io/ioutil"
 	"net/http"
-
+	"strconv"
 	"github.com/gin-gonic/gin"
 	"github.com/sdetAutomation/go-users-api/domain/users"
 	"github.com/sdetAutomation/go-users-api/services"
@@ -15,26 +12,9 @@ import (
 // CreateUser ...
 func CreateUser(c *gin.Context) {
 	var user users.User
-
-	// *** below code peforms similarly to c.ShouldBindJSON(&user) function below...
-	// *** code here for reference. 
-	// bytes, err := ioutil.ReadAll(c.Request.Body)
-	
-	// if err != nil {
-	// 	//todo: handle error
-	// 	return
-	// }
-
-	// if err := json.Unmarshal(bytes, &user); err != nil {
-	// 	//todo: handle error
-	// 	fmt.Println(err.Error())
-	// 	return
-	// }
-	// ****
-
 	// unmarshall the json body from the request to the user struct.
 	if err := c.ShouldBindJSON(&user); err != nil {
-		restErr := errors.NewBadRequestError("invalid json body", err.Error())
+		restErr := errors.NewBadRequestError("invalid json body")
 		c.JSON(restErr.Status, restErr)
 		return
 	}
@@ -53,9 +33,21 @@ func GetUsers(c *gin.Context) {
 	c.String(http.StatusNotImplemented, "implement me please!")
 }
 
-// SearchUser ...
-func SearchUser(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "implement me please!")
+// GetUser ...
+func GetUser(c *gin.Context) {
+	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
+	if userErr != nil {
+		err := errors.NewBadRequestError("invalid user id, user id should be a number")
+		c.JSON(err.Status, err)
+		return
+	}
+
+	user, getErr := services.GetUser(userId)
+	if getErr != nil {
+		c.JSON(getErr.Status, getErr)
+		return
+	}
+	c.JSON(http.StatusOK, user)
 }
 
 // UpdateUser ...

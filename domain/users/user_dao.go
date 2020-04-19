@@ -6,7 +6,7 @@ package users
 
 import (
 	"fmt"
-
+	"github.com/sdetAutomation/go-users-api/utils/date"
 	"github.com/sdetAutomation/go-users-api/utils/errors"
 )
 
@@ -39,6 +39,10 @@ func (user *User) Save() *errors.RestErr {
 		}
 		return errors.NewBadRequestError(fmt.Sprintf("user %d already exists", user.ID))
 	}
+
+	user.DataCreated = date.GetNowString()
+
 	userDb[user.ID] = user
+
 	return nil
 }

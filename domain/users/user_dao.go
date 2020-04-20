@@ -6,6 +6,8 @@ package users
 
 import (
 	"fmt"
+
+	"github.com/sdetAutomation/go-users-api/datasources/mysql/usersdb"
 	"github.com/sdetAutomation/go-users-api/utils/date"
 	"github.com/sdetAutomation/go-users-api/utils/errors"
 )
@@ -16,6 +18,11 @@ var (
 
 // Get ...
 func (user *User) Get() *errors.RestErr {
+	// adding this ping to ensure db connection has been established when app starts. 
+	if err := usersdb.Client.Ping(); err != nil {
+		panic(err)
+	}
+
 	result := userDb[user.ID]
 	if result == nil {
 		return errors.NewBadRequestError(fmt.Sprintf("user %d not found", user.ID))

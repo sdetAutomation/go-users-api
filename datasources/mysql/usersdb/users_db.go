@@ -32,15 +32,24 @@ var (
 func init() {
 	// if using real connection, would use fields declared above to complete the dataSourceName and set secrets as exports
 	// example: dataSourceName := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8", username, password, host, schema)
-	dataSourceName := "./sqlite/local.db"
+	dataSourceName := "./sqlite/local.db?cache=shared"
 	var err error
-	Client, err := sql.Open("sqlite3", dataSourceName)
+	Client, err = sql.Open("sqlite3", dataSourceName)
 	if err != nil {
 		// if there is any issue with connecting to the db, panic and do not start the app
 		panic(err)
 	}
+
+	// // *** only if you need to check and create a table if it does not exist. ***
+	// statement, err := Client.Prepare("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY NOT NULL, first_name TEXT, last_name TEXT, email TEXT NOT NULL UNIQUE, date_created TEXT)")
+	// if err != nil {
+	// 	// if there is any issue with creating a table for db, panic and do not start the app
+	// 	panic(err)
+	// }
+	// statement.Exec()
+
 	if err = Client.Ping(); err != nil {
 		panic(err)
 	}
-	log.Println("database succesfully configured")
+	log.Println("*** database succesfully configured ***")
 }

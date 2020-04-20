@@ -13,32 +13,28 @@ import (
 )
 
 const (
+	errorNoRows = "no rows in result set"
 	indexUniqueEmail =  "UNIQUE constraint failed: users.email"
-	queryInsertUser = "INSERT INTO users (first_name, last_name, email, date_created) VALUES (?, ?, ?, ?)"
-)
-
-var (
-	userDb = make(map[int64]*User)
+	queryInsertUser = "INSERT INTO users (first_name, last_name, email, date_created) VALUES (?, ?, ?, ?);"
+	queryGetUser = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?;"
 )
 
 // Get ...
 func (user *User) Get() *errors.RestErr {
-	// adding this ping to ensure db connection has been established when app starts. 
-	if err := usersdb.Client.Ping(); err != nil {
-		panic(err)
+	stmt, err := usersdb.Client.Prepare(queryGetUser)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
 	}
 
-	result := userDb[user.ID]
-	if result == nil {
-		return errors.NewBadRequestError(fmt.Sprintf("user %d not found", user.ID))
+	defer stmt.Close()
+
+	result := stmt.QueryRow(user.ID)
+	if err := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DataCreated); err != nil {
+		if strings.Contains(err.Error(), errorNoRows) {
+			return errors.NewBadRequestError(fmt.Sprintf("user %d not found", user.ID))
+		}
+		return errors.NewInternalServerError(fmt.Sprintf("error retrieving user %d record: %s", user.ID, err.Error()))
 	}
-
-	user.ID = result.ID
-	user.FirstName = result.FirstName
-	user.LastName = result.LastName
-	user.Email = result.Email
-	user.DataCreated = result.DataCreated
-
 	return nil
 }
 

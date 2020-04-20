@@ -4,6 +4,7 @@ import (
     "database/sql"
     "fmt"
     "strconv"
+    // below blank import is needed in order for CreateDb func to work. 
     _ "github.com/mattn/go-sqlite3"
 )
 // CreateDb ...

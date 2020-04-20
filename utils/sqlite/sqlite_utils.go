@@ -9,7 +9,7 @@ import (
 )
 // CreateDb ...
 func CreateDb() {
-    database, _ := sql.Open("sqlite3", "./database/local.db")
+    database, _ := sql.Open("sqlite3", "./sqlite/local.db")
     statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, firstname TEXT, lastname TEXT, email TEXT, datecreated TEXT)")
     statement.Exec()
     statement, _ = database.Prepare("INSERT INTO users (id, firstname, lastname, email, datecreated) VALUES (?, ?, ?, ?, ?)")

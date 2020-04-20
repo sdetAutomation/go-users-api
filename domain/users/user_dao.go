@@ -6,10 +6,13 @@ package users
 
 import (
 	"fmt"
-
 	"github.com/sdetAutomation/go-users-api/datasources/mysql/usersdb"
-	"github.com/sdetAutomation/go-users-api/utils/date"
+	// "github.com/sdetAutomation/go-users-api/utils/date"
 	"github.com/sdetAutomation/go-users-api/utils/errors"
+)
+
+const (
+	queryInsertUser = "INSERT INTO users (first_name, last_name, email, date_created) VALUES (?, ?, ?, ?)"
 )
 
 var (
@@ -39,17 +42,23 @@ func (user *User) Get() *errors.RestErr {
 
 // Save ...
 func (user *User) Save() *errors.RestErr {
-	current := userDb[user.ID]
-	if current != nil {
-		if current.Email == user.Email {
-			return errors.NewBadRequestError(fmt.Sprintf("email %s already registered", user.Email))
-		}
-		return errors.NewBadRequestError(fmt.Sprintf("user %d already exists", user.ID))
+	stmt, err := usersdb.Client.Prepare(queryInsertUser)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	// defer will execute right before a return statement is executed.
+	defer stmt.Close()
+
+	insertResult, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DataCreated)
+	if err != nil {
+		return errors.NewInternalServerError(fmt.Sprintf("error trying to save user: %s", err.Error()))
 	}
 
-	user.DataCreated = date.GetNowString()
-
-	userDb[user.ID] = user
-
+	userID, err := insertResult.LastInsertId()
+	if err != nil {
+		return errors.NewInternalServerError(fmt.Sprintf("error trying to save user: %s", err.Error()))
+	}
+	// update user with last insert id. 
+	user.ID = userID
 	return nil
 }

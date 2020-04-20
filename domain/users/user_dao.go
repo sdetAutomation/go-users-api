@@ -6,12 +6,14 @@ package users
 
 import (
 	"fmt"
+	"strings"
 	"github.com/sdetAutomation/go-users-api/datasources/mysql/usersdb"
-	// "github.com/sdetAutomation/go-users-api/utils/date"
+	"github.com/sdetAutomation/go-users-api/utils/date"
 	"github.com/sdetAutomation/go-users-api/utils/errors"
 )
 
 const (
+	indexUniqueEmail =  "UNIQUE constraint failed: users.email"
 	queryInsertUser = "INSERT INTO users (first_name, last_name, email, date_created) VALUES (?, ?, ?, ?)"
 )
 
@@ -49,9 +51,13 @@ func (user *User) Save() *errors.RestErr {
 	// defer will execute right before a return statement is executed.
 	defer stmt.Close()
 
+	user.DataCreated = date.GetNowString()
+
 	insertResult, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DataCreated)
 	if err != nil {
-		return errors.NewInternalServerError(fmt.Sprintf("error trying to save user: %s", err.Error()))
+		if strings.Contains(err.Error(), indexUniqueEmail) {
+			return errors.NewBadRequestError(fmt.Sprintf("email %s already exists", user.Email))
+		}
 	}
 
 	userID, err := insertResult.LastInsertId()

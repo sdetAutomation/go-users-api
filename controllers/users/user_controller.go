@@ -70,8 +70,10 @@ func UpdateUser(c *gin.Context) {
 
 	user.ID = userId
 
+	isPartial := c.Request.Method == http.MethodPatch
+
 	// Update user record in the datebase
-	result, updateErr := services.UpdateUser(user)
+	result, updateErr := services.UpdateUser(isPartial, user)
 	if updateErr != nil {
 		// if there is a database error, return in json format the error.
 		c.JSON(updateErr.Status, updateErr)

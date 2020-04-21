@@ -3,6 +3,7 @@ package users
 import (
 	"net/http"
 	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/sdetAutomation/go-users-api/domain/users"
 	"github.com/sdetAutomation/go-users-api/services"
@@ -52,7 +53,31 @@ func GetUser(c *gin.Context) {
 
 // UpdateUser ...
 func UpdateUser(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "implement me please!")
+	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
+	if userErr != nil {
+		err := errors.NewBadRequestError("invalid user id, user id should be a number")
+		c.JSON(err.Status, err)
+		return
+	}
+
+	var user users.User
+	// unmarshall the json body from the request to the user struct.
+	if err := c.ShouldBindJSON(&user); err != nil {
+		restErr := errors.NewBadRequestError("invalid json body")
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+
+	user.ID = userId
+
+	// Update user record in the datebase
+	result, updateErr := services.UpdateUser(user)
+	if updateErr != nil {
+		// if there is a database error, return in json format the error.
+		c.JSON(updateErr.Status, updateErr)
+		return
+	}
+	c.JSON(http.StatusOK, result)
 }
 
 // DeleteUser ...

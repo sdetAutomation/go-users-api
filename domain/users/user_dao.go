@@ -7,6 +7,8 @@ package users
 import (
 	"fmt"
 	"strings"
+
+	"github.com/go-sql-driver/mysql"
 	"github.com/sdetAutomation/go-users-api/datasources/mysql/usersdb"
 	"github.com/sdetAutomation/go-users-api/utils/date"
 	"github.com/sdetAutomation/go-users-api/utils/errors"
@@ -14,7 +16,6 @@ import (
 
 const (
 	errorNoRows = "no rows in result set"
-	indexUniqueEmail =  "UNIQUE constraint failed: users.email"
 	queryInsertUser = "INSERT INTO users (first_name, last_name, email, date_created) VALUES (?, ?, ?, ?);"
 	queryGetUser = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?;"
 )
@@ -29,11 +30,12 @@ func (user *User) Get() *errors.RestErr {
 	defer stmt.Close()
 
 	result := stmt.QueryRow(user.ID)
-	if err := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DataCreated); err != nil {
-		if strings.Contains(err.Error(), errorNoRows) {
+	
+	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DataCreated); getErr != nil {
+		if strings.Contains(getErr.Error(), errorNoRows) {
 			return errors.NewBadRequestError(fmt.Sprintf("user %d not found", user.ID))
 		}
-		return errors.NewInternalServerError(fmt.Sprintf("error retrieving user %d record: %s", user.ID, err.Error()))
+		return errors.NewInternalServerError(fmt.Sprintf("error retrieving user %d record: %s", user.ID, getErr.Error()))
 	}
 	return nil
 }
@@ -49,12 +51,20 @@ func (user *User) Save() *errors.RestErr {
 
 	user.DataCreated = date.GetNowString()
 
-	insertResult, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DataCreated)
-	if err != nil {
-		if strings.Contains(err.Error(), indexUniqueEmail) {
+	insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DataCreated)
+	if saveErr != nil {
+		sqlErr, ok := saveErr.(*mysql.MySQLError)
+		if !ok {
+			return errors.NewInternalServerError(fmt.Sprintf("error trying to save user: %s", saveErr.Error()))
+		}
+		// // below can tell you what error numbers and messages. 
+		// fmt.Println(sqlErr.Number)
+		// fmt.Println(sqlErr.Number)
+		switch sqlErr.Number {
+		case 1062:
 			return errors.NewBadRequestError(fmt.Sprintf("email %s already exists", user.Email))
 		}
-	}
+		return errors.NewInternalServerError(fmt.Sprintf("error trying to save user: %s", saveErr.Error()))	}
 
 	userID, err := insertResult.LastInsertId()
 	if err != nil {

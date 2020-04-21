@@ -10,6 +10,14 @@ import (
 	"github.com/sdetAutomation/go-users-api/utils/errors"
 )
 
+func validateUserID(userIDParam string)(int64, *errors.RestErr) {
+	userID, userErr := strconv.ParseInt(userIDParam, 10, 64)
+	if userErr != nil {
+		return 0, errors.NewBadRequestError("invalid user id, user id should be a number")
+	}
+	return userID, nil
+}
+
 // CreateUser ...
 func CreateUser(c *gin.Context) {
 	var user users.User
@@ -36,14 +44,13 @@ func GetUsers(c *gin.Context) {
 
 // GetUser ...
 func GetUser(c *gin.Context) {
-	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
-	if userErr != nil {
-		err := errors.NewBadRequestError("invalid user id, user id should be a number")
-		c.JSON(err.Status, err)
+	userID, idErr := validateUserID(c.Param("user_id"))
+	if idErr != nil {
+		c.JSON(idErr.Status, idErr)
 		return
 	}
-
-	user, getErr := services.GetUser(userId)
+	
+	user, getErr := services.GetUser(userID)
 	if getErr != nil {
 		c.JSON(getErr.Status, getErr)
 		return
@@ -53,10 +60,9 @@ func GetUser(c *gin.Context) {
 
 // UpdateUser ...
 func UpdateUser(c *gin.Context) {
-	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
-	if userErr != nil {
-		err := errors.NewBadRequestError("invalid user id, user id should be a number")
-		c.JSON(err.Status, err)
+	userID, idErr := validateUserID(c.Param("user_id"))
+	if idErr != nil {
+		c.JSON(idErr.Status, idErr)
 		return
 	}
 
@@ -68,7 +74,7 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	user.ID = userId
+	user.ID = userID
 
 	isPartial := c.Request.Method == http.MethodPatch
 
@@ -84,5 +90,12 @@ func UpdateUser(c *gin.Context) {
 
 // DeleteUser ...
 func DeleteUser(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "implement me please!")
+	// userID, idErr := validateUserID(c.Param("user_id"))
+	// if idErr != nil {
+	// 	c.JSON(idErr.Status, idErr)
+	// 	return
+	// }
+	
+	// services.DeleteUser(userID)
+
 }

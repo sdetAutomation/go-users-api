@@ -10,7 +10,7 @@ import (
 	"github.com/sdetAutomation/go-users-api/utils/errors"
 )
 
-func validateUserID(userIDParam string)(int64, *errors.RestErr) {
+func validateUserID(userIDParam string) (int64, *errors.RestErr) {
 	userID, userErr := strconv.ParseInt(userIDParam, 10, 64)
 	if userErr != nil {
 		return 0, errors.NewBadRequestError("invalid user id, user id should be a number")
@@ -49,7 +49,7 @@ func GetUser(c *gin.Context) {
 		c.JSON(idErr.Status, idErr)
 		return
 	}
-	
+
 	user, getErr := services.GetUser(userID)
 	if getErr != nil {
 		c.JSON(getErr.Status, getErr)
@@ -90,12 +90,15 @@ func UpdateUser(c *gin.Context) {
 
 // DeleteUser ...
 func DeleteUser(c *gin.Context) {
-	// userID, idErr := validateUserID(c.Param("user_id"))
-	// if idErr != nil {
-	// 	c.JSON(idErr.Status, idErr)
-	// 	return
-	// }
-	
-	// services.DeleteUser(userID)
+	userID, idErr := validateUserID(c.Param("user_id"))
+	if idErr != nil {
+		c.JSON(idErr.Status, idErr)
+		return
+	}
+
+	if err := services.DeleteUser(userID); err != nil {
+		c.JSON(err.Status, err)
+	}
+	c.JSON(http.StatusNoContent, nil)
 
 }

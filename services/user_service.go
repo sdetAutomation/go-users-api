@@ -4,6 +4,7 @@ package services
 
 import (
 	"github.com/sdetAutomation/go-users-api/domain/users"
+	"github.com/sdetAutomation/go-users-api/utils/date"
 	"github.com/sdetAutomation/go-users-api/utils/errors"
 )
 
@@ -21,6 +22,10 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
+
+	user.Status = users.StatusActive
+	user.DataCreated = date.GetNowDbFormat()
+
 	if err := user.Save(); err != nil {
 		return nil, err
 	}
@@ -61,4 +66,10 @@ func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) 
 func DeleteUser(userID int64) *errors.RestErr {
 	user := &users.User{ID: userID}
 	return user.Delete()
+}
+
+// Search ...
+func Search(status string) ([]users.User, *errors.RestErr) {
+	dao := &users.User{}
+	return dao.FindByStatus(status)
 }

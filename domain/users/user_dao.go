@@ -5,17 +5,18 @@ package users
 // this pattern allows for easy management and switching between persistant data bases.
 
 import (
+	"fmt"
 	"github.com/sdetAutomation/go-users-api/datasources/mysql/usersdb"
-	"github.com/sdetAutomation/go-users-api/utils/date"
 	"github.com/sdetAutomation/go-users-api/utils/errors"
 	"github.com/sdetAutomation/go-users-api/utils/sqlhelper"
 )
 
 const (
-	queryInsertUser = "INSERT INTO users (first_name, last_name, email, date_created) VALUES (?, ?, ?, ?);"
-	queryGetUser    = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?;"
+	queryInsertUser = "INSERT INTO users (first_name, last_name, email, date_created, status, password) VALUES (?, ?, ?, ?, ?, ?);"
+	queryGetUser    = "SELECT id, first_name, last_name, email, date_created, status FROM users WHERE id=?;"
 	queryUpdateUser = "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?;"
 	queryDeleteUser = "DELETE FROM users WHERE id=?;"
+	queryFindUserByStatus = "SELECT id, first_name, last_name, email, date_created, status FROM users WHERE status=?;"
 )
 
 // Get ...
@@ -29,7 +30,7 @@ func (user *User) Get() *errors.RestErr {
 
 	result := stmt.QueryRow(user.ID)
 
-	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DataCreated); getErr != nil {
+	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DataCreated, &user.Status); getErr != nil {
 		return sqlhelper.ParseError(getErr)
 	}
 	return nil
@@ -44,9 +45,7 @@ func (user *User) Save() *errors.RestErr {
 	// defer will execute right before a return statement is executed.
 	defer stmt.Close()
 
-	user.DataCreated = date.GetNowString()
-
-	insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DataCreated)
+	insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DataCreated, user.Status, user.Password)
 	if saveErr != nil {
 		return sqlhelper.ParseError(saveErr)
 	}
@@ -88,3 +87,33 @@ func (user *User) Delete() *errors.RestErr {
 	}
 	return nil
 }
+
+// FindByStatus ...
+func (user *User) FindByStatus(status string) ([]User, *errors.RestErr) {
+	stmt, err := usersdb.Client.Prepare(queryFindUserByStatus)
+	if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(status)
+	if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+	defer rows.Close()
+
+	results := make([]User, 0)
+
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DataCreated, &user.Status); err != nil {
+			return nil, sqlhelper.ParseError(err)
+		}
+		results = append(results, user)
+	}
+
+	if len(results) == 0 {
+		return nil, errors.NewNotFoundError(fmt.Sprintf("no users matching status %s", status))
+	}
+	return results, nil
+} 

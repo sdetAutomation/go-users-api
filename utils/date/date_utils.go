@@ -8,6 +8,7 @@ import "time"
 
 const(
 	apiDateLayout = "2006-01-02-T15:04:05Z"
+	apiDbLayout = "2006-01-02 15:04:05"
 )
 
 // GetNow ... setting this function to return standard time
@@ -18,4 +19,9 @@ func GetNow() time.Time {
 // GetNowString ...
 func GetNowString() string {
 	return GetNow().Format(apiDateLayout)
+}
+
+// GetNowDbFormat ...
+func GetNowDbFormat() string {
+	return GetNow().Format(apiDbLayout)
 }

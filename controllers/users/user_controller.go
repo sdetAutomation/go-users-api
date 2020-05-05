@@ -102,3 +102,14 @@ func DeleteUser(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 
 }
+
+// Search ...
+func Search(c *gin.Context) {
+	status := c.Query("status")
+
+	users, err := services.Search(status)
+	if err != nil {
+		c.JSON(err.Status, err)
+	}
+	c.JSON(http.StatusOK, users)
+}

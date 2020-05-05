@@ -15,7 +15,7 @@ func CreateDb() {
 	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY NOT NULL, first_name TEXT, last_name TEXT, email TEXT NOT NULL UNIQUE, date_created DATETIME, status TEXT NOT NULL, password TEXT NOT NULL)")
 	statement.Exec()
 	statement, _ = database.Prepare("INSERT INTO users (first_name, last_name, email, date_created, status, password) VALUES (?, ?, ?, ?, ?, ?)")
-	statement.Exec("sdet", "automation", "sdet.testautomation@gmail.com", "2020-04-19 22:58:14", "active", "il0veg0")
+	statement.Exec("sdet", "automation", "sdet.testautomation@gmail.com", "2020-04-19 22:58:14", "active", "e4c2239a5944c664e21eb02e5b90599b")
 	rows, _ := database.Query("SELECT id, first_name, last_name, email, date_created, status FROM users")
 	var id int
 	var firstname string

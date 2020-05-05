@@ -7,6 +7,10 @@ import (
 	"github.com/sdetAutomation/go-users-api/utils/errors"
 )
 
+const (
+	StatusActive = "active"
+)
+
 // User ...
 type User struct {
 	ID 			int64	`json:"id"`
@@ -14,6 +18,8 @@ type User struct {
 	LastName 	string	`json:"last_name"`
 	Email 		string	`json:"email"`
 	DataCreated string	`json:"date_created"`
+	Status		string	`json:"status"`
+	Password	string	`json:"password"`
 }
 
 // // Validate ... this is a function that needs a value to be passed in to exectute.
@@ -27,9 +33,20 @@ type User struct {
 
 // Validate ... this method can check automatically if called without a value being passed in.
 func (user *User) Validate() *errors.RestErr {
+	user.FirstName = strings.TrimSpace(user.FirstName)
+	user.LastName = strings.TrimSpace(user.LastName)
+	
 	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
 	if user.Email == "" {
 		return errors.NewBadRequestError("invalid email address")
 	}
+
+	user.Password = strings.TrimSpace(user.Password)
+	if user.Password == "" {
+		return errors.NewBadRequestError("invalid password")
+	}
+
+	// todo: write a custom method to validate password, such as should be X characters long, and contain special character etc... 
+
 	return nil
 }

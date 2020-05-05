@@ -51,8 +51,8 @@ func (s *usersService) CreateUser(user users.User) (*users.User, *errors.RestErr
 
 // UpdateUser ...
 func (s *usersService) UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) {
-	current, err := s.GetUser(user.ID)
-	if err != nil {
+	current := &users.User{ID: user.ID}
+	if err := current.Get(); err != nil {
 		return nil, err
 	}
 

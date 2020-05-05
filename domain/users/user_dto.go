@@ -22,6 +22,9 @@ type User struct {
 	Password	string	`json:"password"`
 }
 
+// Users ...
+type Users []User
+
 // // Validate ... this is a function that needs a value to be passed in to exectute.
 // func Validate(user *User) *errors.RestErr {
 // 	user.Email = strings.TrimSpace(strings.ToLower(user.Email))

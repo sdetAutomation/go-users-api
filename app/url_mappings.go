@@ -6,6 +6,8 @@ import (
 )
 
 func mapUrls() {
+	router.GET("/", users.Welcome)
+
 	router.GET("/health", health.Health)
 	
 	router.GET("/users", users.GetUsers)

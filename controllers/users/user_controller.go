@@ -18,6 +18,11 @@ func validateUserID(userIDParam string) (int64, *errors.RestErr) {
 	return userID, nil
 }
 
+// Welcome ...
+func Welcome(c *gin.Context) {
+	c.String(http.StatusOK, "Welcome to my go api!!! go to /users/1 to see what's in the database!!!")
+}
+
 // CreateUser ...
 func CreateUser(c *gin.Context) {
 	var user users.User

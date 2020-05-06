@@ -1,1 +1,1 @@
-web: ./bin/go-users-api
+web: ./go-users-api

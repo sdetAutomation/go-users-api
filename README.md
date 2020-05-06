@@ -11,3 +11,5 @@ Users Api written in go
 
 3) setup folder and file structure for mvc pattern
 
+docker build -t go-api .
+docker run -it --rm -p 8080:8080 --name mygoapi go-api

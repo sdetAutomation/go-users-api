@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	// below blank import is needed in order for CreateDb func to work since line 12 references sqlite3.
+	// below blank import is needed in order for CreateDb func to work since line 14 references sqlite3.
 	_ "github.com/mattn/go-sqlite3"
 )
 

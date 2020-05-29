@@ -50,7 +50,7 @@ func (s *usersService) CreateUser(user users.User) (*users.User, *errors.RestErr
 }
 
 // UpdateUser ...
-func (s *usersService) UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) {
+func (s *usersService) UpdateUser( isPartial bool, user users.User) (*users.User, *errors.RestErr) {
 	current := &users.User{ID: user.ID}
 	if err := current.Get(); err != nil {
 		return nil, err
@@ -61,10 +61,10 @@ func (s *usersService) UpdateUser(isPartial bool, user users.User) (*users.User,
 			current.FirstName = user.FirstName
 		}
 		if user.LastName != "" {
-			current.FirstName = user.LastName
+			current.LastName = user.LastName
 		}
 		if user.Email != "" {
-			current.FirstName = user.Email
+			current.Email = user.Email
 		}
 
 	} else {
